@@ -1,0 +1,63 @@
+📁 프로젝트 구조 설명 - 쉽게 풀어쓴 버전 (Servlet + JSP + Tomcat 9)
+
+📁 webapp/ 👉 사용자에게 보이는 화면 구성 및 정적 리소스
+├── index.jsp               : 첫 진입 화면
+├── 📁 WEB-INF/             : JSP와 설정 파일 (사용자 직접 접근 불가)
+│   ├── web.xml                 : 서블릿 매핑 설정
+│   └── views/                 : 각 페이지 화면을 구성하는 JSP 파일
+│       ├── bookmark.jsp           : 즐겨찾기 관련 화면
+│       ├── findInfo.jsp           : 정보 찾기/검색 화면
+│       ├── main.jsp               : 메인 대시보드
+│       ├── map.jsp                : 지도 및 길안내 화면
+│       ├── mypage.jsp             : 마이페이지
+│       ├── report.jsp             : 제보 등록 화면
+│       └── signup.jsp             : 회원가입 화면
+
+📁 java/com/howaboutthisway/ 👉 실제 기능 구현 Java 코드
+├── HelloServlet.java        : 테스트용 기본 서블릿
+├── .env                     : 환경변수 저장 파일
+├── 📁 config/               : 설정 관련 클래스 모음
+│   ├── dbConfig/
+│   │   ├── DBConfig.java        : DB 연결 설정
+│   │   └── MapConfig.java       : 지도 관련 설정
+├── 📁 controller/           : 사용자 요청을 받아 처리하는 서블릿
+│   ├── AdminController.java
+│   ├── BookmarkController.java
+│   ├── MapController.java
+│   ├── reportController.java
+│   └── UserController.java
+├── 📁 dao/                  : DB 접근을 담당하는 클래스들
+│   ├── AdminDAO.java
+│   ├── BookmarkDAO.java
+│   ├── MarkerDAO.java
+│   ├── ReportDAO.java
+│   └── UserDAO.java
+├── 📁 dto/                  : 데이터 전송 객체 (DB ↔ 코드 간 값 전달용)
+│   ├── AdminDTO.java
+│   ├── BookmarkDTO.java
+│   ├── MarkerDTO.java
+│   ├── ReportDTO.java
+│   └── UserDTO.java
+├── 📁 filter/               : 요청 필터링 (ex. 로그인 확인 등)
+│   └── UserFilter.java
+├── 📁 service/              : 핵심 로직 처리 (비즈니스 계층)
+│   ├── AdminService.java / AdminServiceImpl.java
+│   ├── BookmarkService.java / BookmarkServiceImpl.java
+│   ├── MapService.java / MapServiceImpl.java
+│   ├── ReportService.java / ReportServiceImpl.java
+│   └── UserService.java / UserServiceImpl.java
+└── 📁 util/
+    └── DBUtil.java          : DB 연결 도우미 클래스
+
+📁 resources/ 👉 리소스 파일 (현재 비어 있음 또는 설정 가능)
+
+📁 test/ 👉 테스트용 Java 코드 위치
+
+📁 docs/ 👉 기획 및 문서 파일
+├── CareRoute_기획서.txt
+└── 프로젝트_구조_설명_쉽게풀어씀.txt
+
+기타 파일
+- pom.xml           : Maven 빌드 및 의존성 설정
+- mvnw / mvnw.cmd   : Maven Wrapper 실행 파일
+- .gitignore        : Git에서 제외할 파일 목록

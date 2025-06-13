@@ -1,4 +1,4 @@
-package com.howaboutthisway.howaboutthisway;
+package com.howaboutthisway;
 
 import java.io.*;
 import jakarta.servlet.http.*;

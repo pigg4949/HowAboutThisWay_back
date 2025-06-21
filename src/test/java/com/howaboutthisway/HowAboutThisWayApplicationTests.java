@@ -1,4 +1,4 @@
-package com.howaboutthisway.howaboutthisway;
+package com.howaboutthisway;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

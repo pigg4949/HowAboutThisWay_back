@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.HowAboutThisWay.mapper.UserMapper">
+
+    <!-- 1) 전체 조회 -->
+    <select id="findAll"
+            resultType="com.HowAboutThisWay.dto.UserDTO">
+        SELECT * FROM users
+    </select>
+
+    <!-- 2) 단일 조회 -->
+    <select id="findByUserId"
+            parameterType="string"
+            resultType="com.HowAboutThisWay.dto.UserDTO">
+        SELECT *
+        FROM users
+        WHERE userId = #{userId}
+    </select>
+
+    <!-- 3) INSERT: 새 사용자 등록 -->
+    <insert id="insertUser"
+            parameterType="com.HowAboutThisWay.dto.UserDTO"
+            useGeneratedKeys="true"
+            keyProperty="idx">
+        INSERT INTO users
+        (userId, ssn1, ssn2, name, passwordHash, phone, isActive, createdAt, updatedAt)
+        VALUES
+            (#{userId}, #{ssn1}, #{ssn2}, #{name}, #{passwordHash}, #{phone}, #{isActive}, #{createdAt}, #{updatedAt})
+    </insert>
+
+    <!-- 4) UPDATE: 사용자 정보 수정 -->
+    <update id="updateUser"
+            parameterType="com.HowAboutThisWay.dto.UserDTO">
+        UPDATE users
+        SET name         = #{name},
+            passwordHash = #{passwordHash},
+            phone        = #{phone},
+            isActive     = #{isActive},
+            updatedAt    = #{updatedAt}
+        WHERE userId = #{userId}
+    </update>
+
+    <!-- 5) DELETE: 사용자 삭제 -->
+    <delete id="deleteByUserId"
+            parameterType="string">
+        DELETE FROM users
+        WHERE userId = #{userId}
+    </delete>
+
+</mapper>

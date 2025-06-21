@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.koreait.hatw_b.mapper.ReportMapper">
+
+    <!-- 1) 내 제보 목록 조회 -->
+    <select id="findByUserId"
+            parameterType="string"
+            resultType="com.koreait.hatw_b.dto.ReportDTO">
+        SELECT *
+        FROM report
+        WHERE userId = #{userId}
+    </select>
+
+    <!-- 2) 내 제보 단일 조회 -->
+    <select id="findByIdxAndUserId"
+            parameterType="map"
+            resultType="com.koreait.hatw_b.dto.ReportDTO">
+        SELECT *
+        FROM report
+        WHERE idx    = #{idx}
+          AND userId = #{userId}
+    </select>
+
+    <!-- 3) 관리자 전체 조회 (PENDING 우선, 오래된 순) -->
+    <select id="findAllForAdmin"
+            resultType="com.koreait.hatw_b.dto.ReportDTO">
+        SELECT *
+        FROM report
+        ORDER BY
+            CASE WHEN status = 'PENDING' THEN 0 ELSE 1 END ASC,
+            createdAt ASC
+    </select>
+
+    <!-- 4) 타입별 제보 요약 조회 -->
+    <select id="findByType"
+            parameterType="int"
+            resultType="com.koreait.hatw_b.dto.ReportDTO">
+        SELECT
+            lon,
+            lat,
+            imageUrl,
+            comment
+        FROM report
+        WHERE type = #{type}
+    </select>
+
+    <!-- 5) 새 제보 등록 -->
+    <insert id="insertReport"
+            parameterType="com.koreait.hatw_b.dto.ReportDTO"
+            useGeneratedKeys="true"
+            keyProperty="idx">
+        INSERT INTO report
+        (userId, type, lon, lat, comment, imageUrl, status, weight, createdAt, updatedAt)
+        VALUES
+            (#{userId}, #{type}, #{lon}, #{lat},
+             #{comment}, #{imageUrl}, #{status},
+             #{weight}, #{createdAt}, #{updatedAt})
+    </insert>
+
+    <!-- 6) 제보 상태 업데이트 -->
+    <update id="updateStatus"
+            parameterType="map">
+        UPDATE report
+        SET status    = #{status},
+            updatedAt = #{updatedAt}
+        WHERE idx = #{idx}
+    </update>
+
+    <!-- 7) 제보 삭제 -->
+    <delete id="deleteReport"
+            parameterType="map">
+        DELETE FROM report
+        WHERE idx = #{idx}
+        <if test="userId != null">
+            AND userId = #{userId}
+        </if>
+    </delete>
+
+</mapper>

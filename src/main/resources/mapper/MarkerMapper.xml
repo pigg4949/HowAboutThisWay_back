@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.koreait.hatw_b.mapper.MarkerMapper">
+
+    <!-- 1) 타입별 조회 -->
+    <select id="findByType"
+            parameterType="int"
+            resultType="com.koreait.hatw_b.dto.MarkerDTO">
+        SELECT *
+        FROM marker
+        WHERE type = #{type}
+    </select>
+
+    <!-- 2) 전체 조회 -->
+    <select id="findAll"
+            resultType="com.koreait.hatw_b.dto.MarkerDTO">
+        SELECT * FROM marker
+    </select>
+
+    <!-- 3) 단일 조회 -->
+    <select id="findByIdx"
+            parameterType="int"
+            resultType="com.koreait.hatw_b.dto.MarkerDTO">
+        SELECT *
+        FROM marker
+        WHERE idx = #{idx}
+    </select>
+
+    <!-- 4) INSERT -->
+    <insert id="insertMarker"
+            parameterType="com.koreait.hatw_b.dto.MarkerDTO"
+            useGeneratedKeys="true"
+            keyProperty="idx">
+        INSERT INTO marker
+            (type, lon, lat, address, comment, weight)
+        VALUES
+            (#{type}, #{lon}, #{lat}, #{address}, #{comment}, #{weight})
+    </insert>
+
+    <!-- 5) UPDATE -->
+    <update id="updateMarker"
+            parameterType="com.koreait.hatw_b.dto.MarkerDTO">
+        UPDATE marker
+        SET type    = #{type},
+            lon     = #{lon},
+            lat     = #{lat},
+            address = #{address},
+            comment = #{comment},
+            weight  = #{weight}
+        WHERE idx = #{idx}
+    </update>
+
+    <!-- 6) DELETE -->
+    <delete id="deleteMarker"
+            parameterType="int">
+        DELETE FROM marker
+        WHERE idx = #{idx}
+    </delete>
+
+</mapper>

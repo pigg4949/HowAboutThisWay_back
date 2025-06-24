@@ -1,8 +1,11 @@
-package com.HowAboutThisWay.dto;
+package com.HATW.dto;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class MarkerDTO {
     private Integer idx;     // PK
     private Integer type;    // 마커 타입

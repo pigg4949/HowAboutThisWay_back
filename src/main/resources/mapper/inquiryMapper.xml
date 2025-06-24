@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.HATW.mapper.InquiryMapper">
+
+    <!-- 관리자 전체 조회 (미답변 우선, 오래된 순) -->
+    <select id="findAllForAdmin"
+            resultType="com.HATW.dto.InquiryDTO">
+        SELECT idx, userId, content, adminResponses, createdAt, updatedAt
+        FROM inquiry
+        ORDER BY
+            adminResponses IS NOT NULL ASC,
+            createdAt ASC
+    </select>
+
+    <!-- 문의사항 등록 -->
+    <insert id="insertInquiry"
+            parameterType="com.HATW.dto.InquiryDTO"
+            useGeneratedKeys="true"
+            keyProperty="idx">
+        INSERT INTO inquiry
+            (userId, content, adminResponses, createdAt, updatedAt)
+        VALUES
+            (#{userId}, #{content}, #{adminResponses}, #{createdAt}, #{updatedAt})
+    </insert>
+
+    <!-- 5) UPDATE (관리자 답변) -->
+    <update id="updateInquiry"
+            parameterType="com.HATW.dto.InquiryDTO">
+        UPDATE inquiry
+        SET adminResponses = #{adminResponses},
+            updatedAt      = #{updatedAt}
+        WHERE idx = #{idx}
+    </update>
+
+</mapper>

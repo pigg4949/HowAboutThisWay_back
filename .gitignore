@@ -35,3 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# 민감정보 깃에 올리지 않기
+src/main/resources/application.properties

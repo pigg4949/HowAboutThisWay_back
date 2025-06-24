@@ -2,30 +2,12 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.HowAboutThisWay.mapper.ReportMapper">
+<mapper namespace="com.HATW.mapper.ReportMapper">
 
-    <!-- 1) 내 제보 목록 조회 -->
-    <select id="findByUserId"
-            parameterType="string"
-            resultType="com.HowAboutThisWay.dto.ReportDTO">
-        SELECT *
-        FROM report
-        WHERE userId = #{userId}
-    </select>
-
-    <!-- 2) 내 제보 단일 조회 -->
-    <select id="findByIdxAndUserId"
-            parameterType="map"
-            resultType="com.HowAboutThisWay.dto.ReportDTO">
-        SELECT *
-        FROM report
-        WHERE idx    = #{idx}
-          AND userId = #{userId}
-    </select>
 
     <!-- 3) 관리자 전체 조회 (PENDING 우선, 오래된 순) -->
     <select id="findAllForAdmin"
-            resultType="com.HowAboutThisWay.dto.ReportDTO">
+            resultType="com.HATW.dto.ReportDTO">
         SELECT *
         FROM report
         ORDER BY
@@ -34,30 +16,38 @@
     </select>
 
     <!-- 4) 타입별 제보 요약 조회 -->
-    <select id="findByType"
-            parameterType="int"
-            resultType="com.HowAboutThisWay.dto.ReportDTO">
+    <select id="findByTypes"
+            parameterType="java.util.List"
+            resultType="map">
         SELECT
-            lon,
-            lat,
-            imageUrl,
-            comment
+        idx       AS idx,
+        userId    AS userId,
+        type      AS type,
+        lon       AS lon,
+        lat       AS lat,
+        comment   AS comment,
+        imageUrl  AS imageUrl,
+        status    AS status,
+        weight    AS weight,
+        createdAt AS createdAt,
+        updatedAt AS updatedAt
         FROM report
-        WHERE type = #{type}
+        WHERE type IN
+        <foreach item="t" collection="types" open="(" separator="," close=")">
+            #{t}
+        </foreach>
+        AND status = 'APPROVED'
     </select>
 
     <!-- 5) 새 제보 등록 -->
-    <insert id="insertReport"
-            parameterType="com.HowAboutThisWay.dto.ReportDTO"
-            useGeneratedKeys="true"
-            keyProperty="idx">
+    <!-- ReportMapper.xml -->
+    <insert id="insertReport" parameterType="com.HATW.dto.ReportDTO" useGeneratedKeys="true" keyProperty="idx">
         INSERT INTO report
-        (userId, type, lon, lat, comment, imageUrl, status, weight, createdAt, updatedAt)
+            (userId, type, lon, lat, comment, imageUrl, status, weight)
         VALUES
-            (#{userId}, #{type}, #{lon}, #{lat},
-             #{comment}, #{imageUrl}, #{status},
-             #{weight}, #{createdAt}, #{updatedAt})
+            (#{userId}, #{type}, #{lon}, #{lat}, #{comment}, #{imageUrl}, #{status}, #{weight})
     </insert>
+
 
     <!-- 6) 제보 상태 업데이트 -->
     <update id="updateStatus"
@@ -68,14 +58,6 @@
         WHERE idx = #{idx}
     </update>
 
-    <!-- 7) 제보 삭제 -->
-    <delete id="deleteReport"
-            parameterType="map">
-        DELETE FROM report
-        WHERE idx = #{idx}
-        <if test="userId != null">
-            AND userId = #{userId}
-        </if>
-    </delete>
+
 
 </mapper>

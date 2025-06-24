@@ -1,5 +1,6 @@
 package com.HATW.controller;
 
+import com.HATW.dto.CustomRequestDTO;
 import com.HATW.service.MapService;
 import com.HATW.util.Config;
 import com.google.gson.Gson;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.Map;
 
 @CrossOrigin(origins = "http://localhost:5173")
@@ -19,7 +21,6 @@ public class MapController {
 
     private final MapService service;
     private final Gson gson;
-    private final Config config;
 
 //    /**
 //     * 지도 뷰 API (APP_KEY 반환)
@@ -47,15 +48,23 @@ public class MapController {
         }
     }
 
-    /**
-     * 경로 로그 저장 (선택적)
-     */
-    @PostMapping(value = "/routeLog", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> logRoute(@RequestBody Map<String, Object> params) {
-        service.logRoute(params);
-        return ResponseEntity.noContent().build();
-    }
+    @PostMapping("/pedestrianRoute/custom")
+    public ResponseEntity<String> customPedestrianRoute(
+            @RequestBody CustomRequestDTO req) {
+        try {
+            System.out.println("custom controller in");
+            String json = service.getCustomPedestrianRoute(req);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(json);
 
+        } catch (Exception e) {
+            String err = new Gson().toJson(Map.of("error", "커스텀 경로 생성 실패"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(err);
+        }finally {
+            System.out.println("custom controller out");
+        }
+    }
     /**
      * 보행자 경로 안내
      */
@@ -63,7 +72,7 @@ public class MapController {
             produces = MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8")
     public ResponseEntity<String> pedestrianRoute(@RequestBody Map<String, Object> params) {
         try {
-            String json = service.getPedestrianRoute(params);
+            String json = service.getPedestrianRoute(params, Collections.emptyList());
             return ResponseEntity.ok()
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(json);

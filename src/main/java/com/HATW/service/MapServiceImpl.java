@@ -4,7 +4,6 @@ import com.HATW.dto.CoordinateDTO;
 import com.HATW.dto.CustomRequestDTO;
 import com.HATW.dto.ReportDTO;
 import com.HATW.mapper.ReportMapper;
-import com.HATW.util.Config;
 import com.HATW.util.GeometryUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -126,109 +125,138 @@ public class MapServiceImpl implements MapService {
         return res.body();
     }
 
+
+     // 커스텀 보행자 경로: 재귀 함수로 충돌 회피 처리
+
     @Override
     public String getCustomPedestrianRoute(CustomRequestDTO req)
             throws IOException, InterruptedException {
-        // 1. 사고지점 리스트 세팅
+        // avoidList 초기화: reportMapper에서 조회
+        System.out.println("[MapService] getCustomPedestrianRoute 시작, 초기 avoidList 세팅");
         List<ReportDTO> reports = reportMapper.findApprovedReports();
         List<CoordinateDTO> avoidList = reports.stream()
                 .map(r -> new CoordinateDTO(r.getLon(), r.getLat()))
-                .collect(Collectors.toList());
+                .toList();
         req.setAvoidList(avoidList);
 
-        // 2. params 맵 준비 (출발/도착 등)
-        Map<String, Object> params = Map.of(
-                "startX", req.getStartX(),
-                "startY", req.getStartY(),
-                "endX", req.getEndX(),
-                "endY", req.getEndY(),
-                "startName", req.getStartName(),
-                "endName", req.getEndName()
-        );
+        System.out.println("[MapService] getCustomPedestrianRoute 시작, req=" + gson.toJson(req));
+        try {
+            String result = getCustomRouteSection(
+                    req.getStartX(), req.getStartY(),
+                    req.getEndX(),   req.getEndY(),
+                    req.getStartName(), req.getEndName(),
+                    req,
+                    0,
+                    new HashSet<>()
+            );
+            System.out.println("[MapService] getCustomPedestrianRoute 완료, result length=" + (result != null ? result.length() : "null"));
+            return result;
+        } catch (Exception ex) {
+            System.out.println("[MapService] Error in getCustomPedestrianRoute: " + ex);
+            ex.printStackTrace();
+            throw ex;
+        }
+    }
 
-        // 3. 기본 경로 계산
-        String baseJson = getPedestrianRoute(params, Collections.emptyList());
-        List<CoordinateDTO> route = GeometryUtil.parsePolyline(baseJson);
 
-        // 4. detourList(경유지) 생성 (최대 5개)
-        List<CoordinateDTO> detourList = new ArrayList<>();
-        for (CoordinateDTO pt : route) {
-            boolean isConflict = req.getAvoidList().stream()
-                    .anyMatch(av -> GeometryUtil.distance(pt, av) * 111000.0 < req.getAvoidRadius());
-            if (isConflict) {
-                int idx = route.indexOf(pt);
-                CoordinateDTO detour = GeometryUtil.computeDetourPoint(route, idx, req.getAvoidRadius());
-                if (detourList.stream().noneMatch(d -> d.getX() == detour.getX() && d.getY() == detour.getY())) {
-                    detourList.add(detour);
-                    if (detourList.size() >= 5) break;
-                }
+     // 재귀적 회피 경로 계산
+
+    private String getCustomRouteSection(
+            double startX, double startY,
+            double endX,   double endY,
+            String startName, String endName,
+            CustomRequestDTO req,
+            int depth,
+            Set<CoordinateDTO> visitedDetours
+    ) throws IOException, InterruptedException {
+        final int MAX_DEPTH = 10;
+        System.out.println(String.format(
+                "[MapService] Enter getCustomRouteSection depth=%d, start=(%.6f,%.6f), end=(%.6f,%.6f), visitedDetours=%s",
+                depth, startX, startY, endX, endY, visitedDetours
+        ));
+        try {
+            // 1) 깊이 한도 도달 시
+            if (depth >= MAX_DEPTH) {
+                System.out.println("[MapService] depth limit reached (" + depth + ") → 기본 segment 반환");
+                return getPedestrianRoute(
+                        Map.of(
+                                "startX", startX,
+                                "startY", startY,
+                                "endX",   endX,
+                                "endY",   endY,
+                                "startName", startName,
+                                "endName",   endName
+                        ),
+                        Collections.emptyList()
+                );
             }
+
+            // 기본 경로 요청
+            Map<String, Object> params = Map.of(
+                    "startX", startX,
+                    "startY", startY,
+                    "endX",   endX,
+                    "endY",   endY,
+                    "startName", startName,
+                    "endName",   endName
+            );
+            System.out.println("[MapService] Requesting segment, params=" + params);
+            String json = getPedestrianRoute(params, Collections.emptyList());
+            System.out.println("[MapService] Received JSON length=" + (json != null ? json.length() : "null"));
+
+            // 경로 파싱
+            List<CoordinateDTO> route = GeometryUtil.parsePolyline(json);
+            System.out.println("[MapService] Parsed route size=" + (route != null ? route.size() : "null"));
+
+            // 충돌 지점 검색
+            Optional<CoordinateDTO> conflictOpt = route.stream()
+                    .filter(pt -> req.getAvoidList().stream()
+                            .anyMatch(av -> GeometryUtil.distance(pt, av) * 111000.0 < req.getAvoidRadius()))
+                    .findFirst();
+            System.out.println("[MapService] conflict found? " + conflictOpt.isPresent());
+            if (conflictOpt.isEmpty()) {
+                System.out.println("[MapService] No conflict → returning segment");
+                return json;
+            }
+
+            // 회피 지점 계산
+            CoordinateDTO conflict = conflictOpt.get();
+            System.out.println("[MapService] conflict at (" + conflict.getX() + "," + conflict.getY() + ")");
+            int idx = route.indexOf(conflict);
+            CoordinateDTO detour = GeometryUtil.computeDetourPoint(route, idx, req.getAvoidRadius());
+            System.out.println("[MapService] computed detour at (" + detour.getX() + "," + detour.getY() + ")");
+
+            boolean same = conflict.getX() == detour.getX() && conflict.getY() == detour.getY();
+            if (same || visitedDetours.contains(detour)) {
+                System.out.println("[MapService] detour invalid or duplicate → returning segment");
+                return json;
+            }
+            visitedDetours.add(detour);
+
+            // 재귀 호출
+            System.out.println("[MapService] recursing part1 and part2");
+            String part1 = getCustomRouteSection(
+                    startX, startY,
+                    detour.getX(), detour.getY(),
+                    startName, "Detour",
+                    req, depth + 1, visitedDetours
+            );
+            String part2 = getCustomRouteSection(
+                    detour.getX(), detour.getY(),
+                    endX, endY,
+                    "Detour", endName,
+                    req, depth + 1, visitedDetours
+            );
+
+            // 병합
+            System.out.println("[MapService] merging parts");
+            String merged = GeometryUtil.mergeRoutes(part1, part2);
+            System.out.println("[MapService] merged JSON length=" + (merged != null ? merged.length() : "null"));
+            return merged;
+        } catch (Exception ex) {
+            System.out.println("[MapService] Exception in getCustomRouteSection at depth=" + depth + ": " + ex);
+            ex.printStackTrace();
+            throw ex;
         }
-
-        // 5. 경유지(passList) 포함해서 최종 경로 재요청
-        String finalJson = getPedestrianRoute(params, detourList);
-        return finalJson;
-    }
-
-    // 재귀적 회피 경로 함수
-    // 오버로딩 기법
-    private String getCustomRouteSection(
-            double startX, double startY, double endX, double endY,
-            String startName, String endName, CustomRequestDTO req
-    ) throws IOException, InterruptedException {
-        return getCustomRouteSection(startX, startY, endX, endY, startName, endName, req, 0);
-    }
-
-
-// 재귀적 회피 경로 함수 (예외 없이 최대한 회피한 경로 반환)
-    private String getCustomRouteSection(
-            double startX, double startY, double endX, double endY,
-            String startName, String endName, CustomRequestDTO req, int depth
-    ) throws IOException, InterruptedException {
-        int MAX_DEPTH = 10; // 무한루프 방지용
-        if (depth > MAX_DEPTH) {
-            System.out.println("재귀 깊이 초과! 강제 종료, 현재까지 경로 반환");
-            // 예외를 던지지 않고 현재까지 경로 반환
-            String json = getPedestrianRoute(Map.of(
-                    "startX", startX, "startY", startY,
-                    "endX", endX, "endY", endY,
-                    "startName", startName, "endName", endName
-            ), Collections.emptyList());
-            return json;
-        }
-
-        String json = getPedestrianRoute(Map.of(
-                "startX", startX, "startY", startY,
-                "endX", endX, "endY", endY,
-                "startName", startName, "endName", endName
-        ), Collections.emptyList());
-        List<CoordinateDTO> route = GeometryUtil.parsePolyline(json);
-
-        Optional<CoordinateDTO> conflict = route.stream()
-                .filter(pt -> req.getAvoidList().stream()
-                        .anyMatch(av -> GeometryUtil.distance(pt, av) * 111000.0 < req.getAvoidRadius()))
-                .findFirst();
-
-        if (conflict.isEmpty()) {
-            return json;
-        }
-
-        int conflictIdx = route.indexOf(conflict.get());
-        CoordinateDTO detour = GeometryUtil.computeDetourPoint(route, conflictIdx, req.getAvoidRadius());
-
-        // detour 좌표가 충돌점과 같으면 더 이상 회피 불가, 현재까지 경로 반환
-        if (conflict.get().getX() == detour.getX() && conflict.get().getY() == detour.getY()) {
-            System.out.println("detour 좌표가 충돌점과 동일! 강제 종료, 현재까지 경로 반환");
-            return json;
-        }
-
-        String part1 = getCustomRouteSection(
-                startX, startY, detour.getX(), detour.getY(), startName, "Detour", req, depth + 1
-        );
-        String part2 = getCustomRouteSection(
-                detour.getX(), detour.getY(), endX, endY, "Detour", endName, req, depth + 1
-        );
-
-        return GeometryUtil.mergeRoutes(part1, part2);
     }
 }

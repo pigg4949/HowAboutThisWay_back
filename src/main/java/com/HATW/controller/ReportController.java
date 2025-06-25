@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
@@ -63,7 +64,7 @@ public class ReportController {
     /**
      * 관리자: 제보 승인
      */
-    @PostMapping("/admin/{idx}/approve")
+    @PutMapping("/admin/{idx}/approve")
     public ResponseEntity<Void> approveReport(@PathVariable int idx) {
         reportService.updateReportStatus(idx, "APPROVED");
         return ResponseEntity.ok().build();
@@ -72,9 +73,24 @@ public class ReportController {
     /**
      * 관리자: 제보 거절
      */
-    @PostMapping("/admin/{idx}/reject")
+    @PutMapping("/admin/{idx}/reject")
     public ResponseEntity<Void> rejectReport(@PathVariable int idx) {
         reportService.updateReportStatus(idx, "REJECTED");
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 관리자: 제보 상태 변경 (승인 or 거절)
+     */
+    @PutMapping("/admin/reports/{idx}/status")
+    public ResponseEntity<Void> changeReportStatus(@PathVariable int idx,
+                                                   @RequestBody Map<String, String> request) {
+        String status = request.get("status"); // status는 "APPROVED" 또는 "REJECTED"
+        if (!"APPROVED".equals(status) && !"REJECTED".equals(status)) {
+            return ResponseEntity.badRequest().build(); // 잘못된 값 처리
+        }
+
+        reportService.updateReportStatus(idx, status);
         return ResponseEntity.ok().build();
     }
 }

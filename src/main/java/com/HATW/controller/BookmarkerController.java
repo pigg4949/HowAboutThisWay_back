@@ -26,7 +26,6 @@ public class BookmarkerController {
     @GetMapping
     public ResponseEntity<List<BookmarkerDTO>> list(
             @RequestHeader("Authorization") String token) {
-
         // UserService에서 토큰으로 UserDTO 조회
         UserDTO user = userService.getUserInfoFromToken(token);
         if (user == null) {
@@ -48,12 +47,10 @@ public class BookmarkerController {
     public ResponseEntity<?> create(
             @RequestHeader("Authorization") String token,
             @RequestBody BookmarkerDTO bookmarker) {
-
         UserDTO user = userService.getUserInfoFromToken(token);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
         bookmarker.setUserId(user.getUserId());
         bookmarkService.insertBookmarker(bookmarker);
         return ResponseEntity.status(HttpStatus.CREATED).build();

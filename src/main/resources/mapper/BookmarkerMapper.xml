@@ -22,9 +22,9 @@
             useGeneratedKeys="true"
             keyProperty="idx">
         INSERT INTO bookmarker
-            (userId, address, label, createdAt, updatedAt)
+            (userId, address, label)
         VALUES
-            (#{userId}, #{address}, #{label}, #{createdAt}, #{updatedAt})
+            (#{userId}, #{address}, #{label})
     </insert>
 
     <!-- 내 즐겨찾기 삭제 -->

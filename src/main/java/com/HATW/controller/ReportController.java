@@ -2,6 +2,7 @@ package com.HATW.controller;
 
 import com.HATW.dto.ReportDTO;
 import com.HATW.service.ReportService;
+import com.HATW.service.ReportServiceImpl;
 import com.HATW.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +20,9 @@ import java.util.Map;
 @RequestMapping("/api/reports")
 public class ReportController {
 
-    private final ReportService reportService;
+    private final ReportService sreportService;
     private final JwtUtil jwtUtil;
+    private final ReportServiceImpl reportService;
 
     /**
      * 사용자 제보 등록
@@ -52,37 +54,20 @@ public class ReportController {
     /**
      * 관리자: 모든 제보 조회
      */
-    @GetMapping("/admin/all")
-    public ResponseEntity<List<ReportDTO>> getAllReports() {
+    @GetMapping("/admin/pending")
+    public ResponseEntity<List<ReportDTO>> getAllReports(@RequestHeader("Authorization") String token) {
         List<ReportDTO> reports = reportService.getAllReports();
         if (reports.isEmpty()) {
+            System.out.println("ReportController: No reports found.");
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(reports);
     }
 
     /**
-     * 관리자: 제보 승인
-     */
-    @PutMapping("/admin/{idx}/approve")
-    public ResponseEntity<Void> approveReport(@PathVariable int idx) {
-        reportService.updateReportStatus(idx, "APPROVED");
-        return ResponseEntity.ok().build();
-    }
-
-    /**
-     * 관리자: 제보 거절
-     */
-    @PutMapping("/admin/{idx}/reject")
-    public ResponseEntity<Void> rejectReport(@PathVariable int idx) {
-        reportService.updateReportStatus(idx, "REJECTED");
-        return ResponseEntity.ok().build();
-    }
-
-    /**
      * 관리자: 제보 상태 변경 (승인 or 거절)
      */
-    @PutMapping("/admin/reports/{idx}/status")
+    @PutMapping("/admin/{idx}/status")
     public ResponseEntity<Void> changeReportStatus(@PathVariable int idx,
                                                    @RequestBody Map<String, String> request) {
         String status = request.get("status"); // status는 "APPROVED" 또는 "REJECTED"

@@ -14,14 +14,30 @@
     </select>
 
     <!-- 3) INSERT: 새 사용자 등록 -->
-    <insert id="insertUser"
-            parameterType="com.HATW.dto.UserDTO"
-            useGeneratedKeys="true"
-            keyProperty="idx">
+    <insert id="insertUser" parameterType="com.HATW.dto.UserDTO">
         INSERT INTO users
-        (userId, ssn1, ssn2, name, passwordHash, phone, isActive, createdAt, updatedAt)
-        VALUES
-            (#{userId}, #{ssn1}, #{ssn2}, #{name}, #{passwordHash}, #{phone}, #{isActive}, #{createdAt}, #{updatedAt})
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            userId,
+            ssn1,
+            ssn2,
+            name,
+            passwordHash,
+            phone,
+            <if test="isActive != null">isActive,</if>
+            <if test="createdAt != null">createdAt,</if>
+            <if test="updatedAt != null">updatedAt,</if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            #{userId},
+            #{ssn1},
+            #{ssn2},
+            #{name},
+            #{passwordHash},
+            #{phone},
+            <if test="isActive != null">#{isActive},</if>
+            <if test="createdAt != null">#{createdAt},</if>
+            <if test="updatedAt != null">#{updatedAt},</if>
+        </trim>
     </insert>
 
     <!-- 4) UPDATE: 사용자 정보 수정 -->
@@ -42,5 +58,12 @@
         DELETE FROM users
         WHERE userId = #{userId}
     </delete>
+
+    <insert id="insertKakaoUser" parameterType="com.HATW.dto.UserDTO">
+        INSERT INTO users
+        (userId, passwordHash, name, ssn1, ssn2, phone, isActive, createdAt)
+        VALUES
+            (#{userId}, #{passwordHash}, #{name}, #{ssn1}, #{ssn2}, #{phone}, #{isActive}, #{createdAt})
+    </insert>
 
 </mapper>

@@ -13,5 +13,5 @@ import java.util.List;
 @Mapper
 public interface MarkerMapper {
     List<MarkerDTO> findMarkersByTypes(@Param("types") List<Integer> types);
-
+    List<MarkerDTO> findElevatorsByStation(String station);
 }

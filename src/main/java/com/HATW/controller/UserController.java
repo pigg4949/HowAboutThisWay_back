@@ -1,12 +1,17 @@
 package com.HATW.controller;
 
 import com.HATW.dto.UserDTO;
+import com.HATW.mapper.UserMapper;
 import com.HATW.service.UserService;
+import com.HATW.util.JwtUtil;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 @RestController
@@ -16,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService service;
+    private final JwtUtil jwtUtil;
 
 //    public UserController(UserService service) {
 //        this.service = service;
@@ -63,6 +69,18 @@ public class UserController {
     public ResponseEntity<?> delete(@RequestHeader("Authorization") String token) {
         service.delete(token);
         return ResponseEntity.ok("회원탈퇴 완료");
+    }
+
+    @GetMapping("/kakao/callback")
+    public ResponseEntity<?> kakaoLogin(@RequestParam("code") String code, HttpSession session) {
+        UserDTO user = service.kakaoLogin(code);
+        session.setAttribute("user", user);
+        String jwt = jwtUtil.generateToken(user.getUserId());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("token", jwt);
+        response.put("userId", user.getUserId());
+        return ResponseEntity.ok(response);
     }
 
 }

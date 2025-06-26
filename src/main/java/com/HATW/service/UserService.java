@@ -9,4 +9,5 @@ public interface UserService {
     void update(String token, UserDTO user);
     void delete(String token);
     UserDTO getUserInfoFromToken(String token);
+    UserDTO kakaoLogin(String code);
 }

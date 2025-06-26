@@ -13,4 +13,5 @@ public interface UserMapper {
     void insertUser(UserDTO user);
     void update(UserDTO user);
     void delete(@Param("userId") String userId);
+    void insertKakaoUser(UserDTO user);
 }

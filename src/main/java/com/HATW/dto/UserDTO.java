@@ -23,4 +23,5 @@ public class UserDTO {
     private Timestamp createdAt;
     private Timestamp updatedAt;
     private Boolean isAdmin; // 관리자
+    private String nick;
 }

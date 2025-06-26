@@ -11,4 +11,14 @@
             #{type}
         </foreach>
     </select>
+    <select id="findElevatorsByStation"
+            parameterType="string"
+            resultType="com.HATW.dto.MarkerDTO">
+        SELECT lon, lat, type, comment
+        FROM marker
+        WHERE type = 3
+        AND comment LIKE CONCAT('%', #{station}, '%')
+    </select>
+
+
 </mapper>

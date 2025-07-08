@@ -1,0 +1,101 @@
+HELP.md
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+### Application Properties ###
+# 민감한 설정 파일들
+src/main/resources/application.properties
+src/main/resources/application-prod.properties
+src/main/resources/application-dev.properties
+src/main/resources/application-local.properties
+
+### Uploads and Static Files ###
+# 업로드된 파일들 (사용자 업로드 파일)
+uploads/
+src/main/resources/static/uploads/
+
+### Logs ###
+# 로그 파일들
+*.log
+logs/
+
+### Database ###
+# 데이터베이스 관련 파일들
+*.db
+*.sqlite
+*.sqlite3
+
+### API Keys and Secrets ###
+# API 키와 시크릿 파일들
+*.key
+*.pem
+*.p12
+*.jks
+
+### Environment Variables ###
+# 환경 변수 파일들
+.env
+.env.local
+.env.development
+.env.production
+
+### IDE and Editor ###
+# 추가 IDE 설정들
+*.swp
+*.swo
+*~
+
+### OS Generated Files ###
+# 운영체제 생성 파일들
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+### Temporary Files ###
+# 임시 파일들
+*.tmp
+*.temp
+temp/
+tmp/
+
+### Security Files ###
+# 보안 관련 파일들 (API 키, 시크릿 등)
+src/main/java/com/HATW/util/GoogleAuthUtil.java

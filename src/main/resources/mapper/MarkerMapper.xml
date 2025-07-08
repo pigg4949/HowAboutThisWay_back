@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.HATW.mapper.MarkerMapper">
+    <!-- 1) 타입별 조회 (http://localhost:8080/markers?type=3)-->
+    <select id="findMarkersByTypes" parameterType="map" resultType="com.HATW.dto.MarkerDTO">
+    SELECT * FROM marker
+    WHERE type IN
+    <foreach collection="list" item="type" open="(" separator="," close=")">
+        #{type}
+    </foreach>
+</select>
+    <select id="selectByStationName" resultType="com.HATW.dto.MarkerDTO">
+        SELECT
+            lon,
+            lat,
+            comment
+        FROM marker
+        WHERE comment LIKE CONCAT('%', #{stationName}, '%')
+          AND weight = 0
+          AND type   = 3;
+    </select>
+
+    <select id="selectAllElevators" resultType="com.HATW.dto.MarkerDTO">
+        SELECT lon, lat, comment
+        FROM marker
+        WHERE type = 3 AND weight = 0
+    </select>
+
+
+</mapper>

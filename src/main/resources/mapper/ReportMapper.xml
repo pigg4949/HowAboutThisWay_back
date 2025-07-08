@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.HATW.mapper.ReportMapper">
+
+    <!-- ID로 제보 조회 -->
+    <select id="findById" parameterType="long" resultType="com.HATW.dto.ReportDTO">
+        SELECT
+            idx, userId, type, lon, lat, comment, imageUrl, status, weight, createdAt, updatedAt
+        FROM report
+        WHERE idx = #{reportId}
+    </select>
+
+    <!-- 관리자 전체 조회 (PENDING 우선, 오래된 순) -->
+    <select id="findAllForAdmin"
+            resultType="com.HATW.dto.ReportDTO">
+        SELECT *
+        FROM report
+        ORDER BY
+            CASE WHEN status = 'PENDING' THEN 0 ELSE 1 END ASC,
+            createdAt ASC
+    </select>
+
+    <!-- 타입별 제보 요약 조회 -->
+    <select id="findByTypes"
+            parameterType="java.util.List"
+            resultType="map">
+        SELECT
+        idx       AS idx,
+        userId    AS userId,
+        type      AS type,
+        lon       AS lon,
+        lat       AS lat,
+        comment   AS comment,
+        imageUrl  AS imageUrl,
+        status    AS status,
+        weight    AS weight,
+        createdAt AS createdAt,
+        updatedAt AS updatedAt
+        FROM report
+        WHERE type IN
+        <foreach item="t" collection="types" open="(" separator="," close=")">
+            #{t}
+        </foreach>
+        AND status = 'APPROVED'
+    </select>
+
+    <!-- 새 제보 등록 -->
+    <!-- ReportMapper.xml -->
+    <insert id="insertReport" parameterType="com.HATW.dto.ReportDTO" useGeneratedKeys="true" keyProperty="idx">
+        INSERT INTO report
+            (userId, type, lon, lat, comment, imageUrl, status, weight)
+        VALUES
+            (#{userId}, #{type}, #{lon}, #{lat}, #{comment}, #{imageUrl}, #{status}, #{weight})
+    </insert>
+
+
+    <!-- 제보 상태 업데이트 -->
+    <update id="updateStatus"
+            parameterType="map">
+        UPDATE report
+        SET status    = #{status},
+            updatedAt = #{updatedAt}
+        WHERE idx = #{idx}
+    </update>
+
+    <select id="findByUserId" parameterType="string" resultType="com.HATW.dto.ReportDTO">
+        SELECT
+            idx, userId, type, lon, lat, comment, imageUrl, status, weight, createdAt,
+            updatedAt
+        FROM report
+        WHERE userId = #{userId}
+        ORDER BY createdAt DESC
+    </select>
+
+    <select id="findApprovedReports" resultType="com.HATW.dto.ReportDTO">
+        SELECT
+        lon   AS lon,
+        lat   AS lat,
+        comment
+        FROM report
+        WHERE status = "APPROVED"  <!-- 필요시 조건 추가 -->
+    </select>
+
+    <!-- 이미지 URL 업데이트 (수정됨) -->
+    <update id="updateImageUrl" parameterType="map">
+        UPDATE report
+        SET imageUrl = #{imageUrl}
+        WHERE idx = #{reportId}
+    </update>
+
+    <update id="updateComment" parameterType="map">
+        UPDATE report SET comment = #{comment}, updatedAt = NOW() WHERE idx = #{reportId}
+    </update>
+
+</mapper>

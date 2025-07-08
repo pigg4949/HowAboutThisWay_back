@@ -37,6 +37,8 @@
 - `dev-gwang`: 개발 브랜치
 - `dev-*`: 개별 개발자 브랜치
 
+## 이길어때 프론트 repository
+"https://github.com/pigg4949/HowAboutThisWay_front"
 ---
 
-_Last updated: 2025-01-04_
+_Last updated: 2025-07-08_

@@ -2,93 +2,62 @@ package com.HATW.service;
 
 import com.HATW.dto.ReportDTO;
 import com.HATW.mapper.ReportMapper;
-import com.HATW.service.ReportService;
-import org.springframework.beans.factory.annotation.Value;
+import com.HATW.mapper.UserMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.*;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class ReportServiceImpl implements ReportService {
 
     private final ReportMapper reportMapper;
-
-    @Value("${file.upload-dir}")
-    private String uploadDir;
-
-    public ReportServiceImpl(ReportMapper reportMapper) {
-        this.reportMapper = reportMapper;
-    }
+    private final UserMapper userMapper;
 
     @Override
-    public void createReport(ReportDTO reportDTO, MultipartFile file) {
-        try {
-            // 현재시간 포맷 정의 (연월일T시분초)
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
-            String formattedDateTime = LocalDateTime.now().format(formatter);
-
-            // 파일 확장자 추출
-            String originalFilename = file.getOriginalFilename();
-            String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-
-            // 파일명 구성 (userId, 시간, 타입, UUID)
-            String fileName = reportDTO.getUserId() + "_" +
-                    formattedDateTime + "_" +
-                    reportDTO.getType() + "_" +
-                    UUID.randomUUID() + extension;
-
-            // 저장 경로 설정
-            Path filePath = Paths.get(uploadDir, fileName);
-
-            // 파일 저장
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-            // 저장된 파일의 URL 구성
-            String fileUrl = "/reportImgs/" + fileName;
-
-
-            reportDTO.setImageUrl(fileUrl);
+    public void submitReport(ReportDTO reportDTO) {
+        // 이미지 URL이 이미 설정되어 있다고 가정 (컨트롤러에서 처리)
+        if (reportDTO.getStatus() == null) {
             reportDTO.setStatus("PENDING");
-            reportDTO.setCreatedAt(LocalDateTime.now());
-            reportDTO.setUpdatedAt(LocalDateTime.now());
-
-            // DB 저장
-            reportMapper.insertReport(reportDTO);
-
-        } catch (IOException e) {
-            throw new RuntimeException("파일 업로드 실패: " + e.getMessage());
         }
+        if (reportDTO.getCreatedAt() == null) {
+            reportDTO.setCreatedAt(LocalDateTime.now());
+        }
+        if (reportDTO.getUpdatedAt() == null) {
+            reportDTO.setUpdatedAt(LocalDateTime.now());
+        }
+        reportMapper.insertReport(reportDTO);
     }
 
     @Override
-    public List<ReportDTO> getReportsByUserId(String userId) {
-        return reportMapper.findByUserId(userId);
+    public List<ReportDTO> getReportsByUser(Long userId) {
+        // userId를 String으로 변환 (UserDTO에서 userId 가져오기)
+        var user = userMapper.findByIdx(userId.intValue());
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
+        }
+        return reportMapper.findByUserId(user.getUserId());
     }
 
     @Override
-    public List<ReportDTO> getAllReportsForAdmin() {
-        return reportMapper.findAllForAdmin();
-    }
-
-    @Override
-    public List<Map<String, Object>> getReportsByTypes(List<Integer> types) {
-        return reportMapper.findByTypes(types);
-    }
-
-    @Override
-    public void deleteReport(int idx, String userId) {
-        reportMapper.deleteReport(idx, userId);
-    }
-
-    @Override
-    public void updateReportStatus(int idx, String status) {
-        reportMapper.updateStatus(idx, status, LocalDateTime.now());
+    public void deleteReport(Long reportId, Long userId) {
+        // 사용자 확인
+        var user = userMapper.findByIdx(userId.intValue());
+        if (user == null) {
+            throw new SecurityException("사용자를 찾을 수 없습니다.");
+        }
+        
+        // 신고 확인 및 소유자 확인
+        ReportDTO report = reportMapper.findByIdx(reportId.intValue());
+        if (report == null) {
+            throw new IllegalArgumentException("신고를 찾을 수 없습니다.");
+        }
+        if (!report.getUserId().equals(user.getUserId())) {
+            throw new SecurityException("본인의 신고만 삭제할 수 있습니다.");
+        }
+        
+        reportMapper.deleteReport(reportId.intValue(), user.getUserId());
     }
 }

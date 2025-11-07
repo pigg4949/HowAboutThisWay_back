@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class PageController {
 
-    @Value("${tmap.api.key}")
+    @Value("${AppKey}")
     private String appKey;
 
     @GetMapping("/")

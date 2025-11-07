@@ -18,6 +18,13 @@ public interface ReportMapper {
     List<ReportDTO> findByUserId(@Param("userId") String userId);
 
     /**
+     * ID로 제보 조회
+     * @param idx 제보 PK
+     * @return ReportDTO
+     */
+    ReportDTO findByIdx(@Param("idx") int idx);
+
+    /**
      * 내 제보 단일 조회 (본인 확인)
      * @param idx    제보 PK
      * @param userId 사용자 아이디

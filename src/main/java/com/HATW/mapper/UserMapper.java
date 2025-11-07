@@ -40,4 +40,26 @@ public interface UserMapper {
      * @param userId 삭제할 사용자 아이디
      */
     void deleteByUserId(@Param("userId") String userId);
+
+    /**
+     * ID로 사용자 조회
+     * @param idx 사용자 PK
+     * @return UserDTO
+     */
+    UserDTO findByIdx(@Param("idx") Integer idx);
+
+    /**
+     * 전화번호로 사용자 조회
+     * @param phone 전화번호
+     * @return UserDTO
+     */
+    UserDTO findByPhoneNumber(@Param("phone") String phone);
+
+    /**
+     * 이름과 전화번호로 사용자 조회 (아이디 찾기용)
+     * @param name 이름
+     * @param phone 전화번호
+     * @return UserDTO
+     */
+    UserDTO findByNameAndPhone(@Param("name") String name, @Param("phone") String phone);
 }

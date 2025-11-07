@@ -10,10 +10,22 @@ import java.util.List;
 public interface BookmarkerMapper {
 
     /**
+     * 전체 북마크 조회
+     */
+    List<BookmarkerDTO> findAll();
+
+    /**
      * 내 즐겨찾기 목록 조회
      * @param userId 조회할 사용자 아이디
      */
     List<BookmarkerDTO> findByUserId(@Param("userId") String userId);
+
+    /**
+     * ID로 북마크 조회
+     * @param idx 북마크 PK
+     * @return BookmarkerDTO
+     */
+    BookmarkerDTO findByIdx(@Param("idx") Integer idx);
 
     /**
      * 내 즐겨찾기 등록

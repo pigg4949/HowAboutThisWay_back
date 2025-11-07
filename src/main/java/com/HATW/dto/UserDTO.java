@@ -1,6 +1,5 @@
 package com.HATW.dto;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,7 +13,9 @@ public class UserDTO {
     private String ssn1;           // 주민번호 앞자리
     private String ssn2;           // 주민번호 뒷자리
     private String name;           // 이름
+    private String password;       // 비밀번호 (평문, 회원가입/수정 시에만 사용)
     private String passwordHash;   // 비밀번호 해시
+    private String passwordSalt;   // 비밀번호 솔트
     private String phone;          // 전화번호
     private Boolean isActive;      // 활성 여부
     private LocalDateTime createdAt; // 생성일

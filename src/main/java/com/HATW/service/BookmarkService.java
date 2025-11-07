@@ -6,34 +6,34 @@ import com.HATW.dto.BookmarkerDTO;
 
 public interface BookmarkService {
     /**
-     * 새 즐겨찾기를 저장합니다.
+     * 전체 북마크 조회
+     * @return 북마크 리스트
+     */
+    List<BookmarkerDTO> getAllBookmarks();
+
+    /**
+     * 사용자 ID로 북마크 목록 조회
+     * @param userId 사용자 ID
+     * @return 북마크 리스트
+     */
+    List<BookmarkerDTO> getBookmarksByUserId(Long userId);
+
+    /**
+     * 새 북마크를 저장합니다.
      * @param bookmarkDTO userId, address, label 필드를 포함한 DTO
      */
-    void save(BookmarkerDTO bookmarkDTO);
+    void createBookmark(BookmarkerDTO bookmarkDTO);
 
     /**
-     * 특정 즐겨찾이(idx) 조회
-     * @param idx 즐겨찾이 고유번호
-     * @return 해당 즐겨찾이 정보 (없으면 null)
+     * 북마크 정보 수정 (label이나 address 변경)
+     * @param bookmarkId 북마크 ID
+     * @param bookmarkDTO 변경된 address/label 포함
      */
-    BookmarkerDTO findByIdx(int idx);
+    void updateBookmark(Long bookmarkId, BookmarkerDTO bookmarkDTO);
 
     /**
-     * 사용자(userId)별 즐겨찾이 목록 조회
-     * @param userId 조회할 사용자 아이디
-     * @return 즐겨찾이 리스트
+     * 북마크 삭제
+     * @param bookmarkId 삭제할 북마크 ID
      */
-    List<BookmarkerDTO> findByUserId(String userId);
-
-    /**
-     * 즐겨찾이 정보 수정 (label이나 address 변경)
-     * @param bookmarkDTO idx, 변경된 address/label 포함
-     */
-    void update(BookmarkerDTO bookmarkDTO);
-
-    /**
-     * 즐겨찾이 삭제
-     * @param idx 삭제할 즐겨찾이 고유번호
-     */
-    void deleteByIdx(int idx);
+    void deleteBookmark(Long bookmarkId);
 }

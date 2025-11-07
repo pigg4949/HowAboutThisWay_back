@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class SmsService {
 
+    @SuppressWarnings("unused")
     private final DefaultMessageService messageService;
     private final String senderPhone;
     private final Map<String, VerificationInfo> verificationMap = new ConcurrentHashMap<>();
@@ -37,6 +38,7 @@ public class SmsService {
         message.setTo(phoneNumber);
         message.setText("[HATW] 인증번호: " + code + " (5분 이내 입력)");
 
+        // TODO: 실제 SMS 전송 활성화 시 주석 해제
         // messageService.send(message);
     }
 
@@ -49,7 +51,7 @@ public class SmsService {
 
     private String generateCode() {
         Random random = new Random();
-        int number = 100000 + random.nextInt(900000); // 100000 ~ 999999
+        int number = (int) Math.pow(10, CODE_LENGTH - 1) + random.nextInt((int) (Math.pow(10, CODE_LENGTH) - Math.pow(10, CODE_LENGTH - 1)));
         return String.valueOf(number);
     }
 

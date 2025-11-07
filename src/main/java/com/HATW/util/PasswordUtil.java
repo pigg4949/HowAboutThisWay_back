@@ -1,11 +1,9 @@
 package com.HATW.util;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class PasswordUtil {
-    private static final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-
     public static String encode(String password) {
-        return encoder.encode(password);
+        return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 }

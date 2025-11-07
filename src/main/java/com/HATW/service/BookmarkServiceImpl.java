@@ -8,34 +8,53 @@ import lombok.RequiredArgsConstructor;
 
 import com.HATW.dto.BookmarkerDTO;
 import com.HATW.mapper.BookmarkerMapper;
+import com.HATW.mapper.UserMapper;
 
 @Service
 @RequiredArgsConstructor
 public class BookmarkServiceImpl implements BookmarkService {
     private final BookmarkerMapper bookmarkerMapper;
+    private final UserMapper userMapper;
 
     @Override
-    public void save(BookmarkerDTO bookmarkDTO) {
-        bookmarkerMapper.insert(bookmarkerDTO);
+    public List<BookmarkerDTO> getAllBookmarks() {
+        return bookmarkerMapper.findAll();
     }
 
     @Override
-    public BookmarkerDTO findByIdx(int idx) {
-        return bookmarkerMapper.findByIdx(idx);
+    public List<BookmarkerDTO> getBookmarksByUserId(Long userId) {
+        // userId를 String으로 변환 (UserDTO에서 userId 가져오기)
+        var user = userMapper.findByIdx(userId.intValue());
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
+        }
+        return bookmarkerMapper.findByUserId(user.getUserId());
     }
 
     @Override
-    public List<BookmarkerDTO> findByUserId(String userId) {
-        return bookmarkerMapper.findByUserId(userId);
+    public void createBookmark(BookmarkerDTO bookmarkDTO) {
+        if (bookmarkDTO.getUserId() == null || bookmarkDTO.getUserId().isEmpty()) {
+            throw new IllegalArgumentException("사용자 ID가 필요합니다.");
+        }
+        bookmarkerMapper.insertBookmarker(bookmarkDTO);
     }
 
     @Override
-    public void update(BookmarkerDTO bookmarkDTO) {
-        bookmarkerMapper.update(bookmarkDTO);
+    public void updateBookmark(Long bookmarkId, BookmarkerDTO bookmarkDTO) {
+        BookmarkerDTO existing = bookmarkerMapper.findByIdx(bookmarkId.intValue());
+        if (existing == null) {
+            throw new IllegalStateException("북마크를 찾을 수 없습니다.");
+        }
+        bookmarkDTO.setIdx(bookmarkId.intValue());
+        bookmarkerMapper.updateBookmarker(bookmarkDTO);
     }
 
     @Override
-    public void deleteByIdx(int idx) {
-        bookmarkerMapper.deleteByIdx(idx);
+    public void deleteBookmark(Long bookmarkId) {
+        BookmarkerDTO existing = bookmarkerMapper.findByIdx(bookmarkId.intValue());
+        if (existing == null) {
+            throw new IllegalStateException("북마크를 찾을 수 없습니다.");
+        }
+        bookmarkerMapper.deleteBookmarker(bookmarkId.intValue(), existing.getUserId());
     }
 }

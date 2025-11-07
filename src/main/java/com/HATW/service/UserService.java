@@ -60,4 +60,11 @@ public interface UserService {
      * @return 검증 성공 시 true
      */
     boolean verifyPhoneCode(String phone, String code);
+
+    /**
+     * JWT 토큰에서 사용자 정보 조회
+     * @param token JWT 토큰 (Bearer 포함 또는 토큰만)
+     * @return UserDTO
+     */
+    UserDTO getUserInfoFromToken(String token);
 }

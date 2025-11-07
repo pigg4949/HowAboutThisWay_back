@@ -47,4 +47,18 @@ public interface MarkerMapper {
      * @param idx 삭제할 마커 PK
      */
     void deleteMarker(@Param("idx") int idx);
+
+    /**
+     * 역명으로 마커 조회
+     * @param stationName 역명
+     * @return 마커 리스트
+     */
+    List<MarkerDTO> selectByStationName(@Param("stationName") String stationName);
+
+    /**
+     * 타입 리스트로 마커 조회
+     * @param types 마커 타입 리스트
+     * @return 마커 리스트
+     */
+    List<MarkerDTO> findMarkersByTypes(@Param("types") List<Integer> types);
 }

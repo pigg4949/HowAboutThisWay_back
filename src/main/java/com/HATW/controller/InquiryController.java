@@ -4,7 +4,6 @@ import com.HATW.dto.InquiryDTO;
 import com.HATW.dto.UserDTO;
 import com.HATW.service.InquiryService;
 import com.HATW.service.UserService;
-import com.HATW.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +19,6 @@ public class InquiryController {
 
     private final InquiryService inquiryService;
     private final UserService userService;
-    private final JwtUtil jwtUtil;
 
     // 관리자용 조회
     @GetMapping("/admin")

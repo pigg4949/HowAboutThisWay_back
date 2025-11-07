@@ -18,6 +18,7 @@ public class UserDTO {
     private String passwordSalt;   // 비밀번호 솔트
     private String phone;          // 전화번호
     private Boolean isActive;      // 활성 여부
+    private Boolean isAdmin;        // 관리자 여부 (0 = 일반, 1 = 관리자)
     private LocalDateTime createdAt; // 생성일
     private LocalDateTime updatedAt; // 수정일
 }

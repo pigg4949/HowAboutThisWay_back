@@ -4,6 +4,7 @@ package com.HATW.service;
 import com.HATW.dto.LoginDTO;
 import com.HATW.dto.UserDTO;
 import com.HATW.mapper.UserMapper;
+import com.HATW.util.JwtUtil;
 import com.HATW.util.SmsService;
 import jakarta.servlet.http.HttpSession;
 import org.mindrot.jbcrypt.BCrypt;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final SmsService smsService;
+    private final JwtUtil jwtUtil;
 
     @Override
     public void register(UserDTO userDTO) {
@@ -97,6 +99,33 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean verifyPhoneCode(String phone, String code) {
         return smsService.verifyCode(phone, code);
+    }
+
+    @Override
+    public UserDTO getUserInfoFromToken(String token) {
+        try {
+            // Bearer 접두사 제거
+            String actualToken = token;
+            if (token != null && token.startsWith("Bearer ")) {
+                actualToken = token.substring(7);
+            }
+            
+            // 토큰 유효성 검증
+            if (!jwtUtil.isTokenValid(actualToken)) {
+                return null;
+            }
+            
+            // 토큰에서 userId 추출
+            String userId = jwtUtil.getUserIdFromToken(actualToken);
+            if (userId == null) {
+                return null;
+            }
+            
+            // 사용자 정보 조회
+            return userMapper.findByUserId(userId);
+        } catch (Exception e) {
+            return null;
+        }
     }
 }
 

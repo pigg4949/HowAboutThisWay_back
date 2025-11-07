@@ -1,6 +1,5 @@
 package com.HATW.dto;
 
-import jakarta.validation.constraints.Min;
 import lombok.*;
 
 import java.util.List;
@@ -23,8 +22,7 @@ public class CustomRequestDTO {
     private String endName;
 
     private List<CoordinateDTO> avoidList;
-    // 피해야 할 반경 (미터 단위)
-    @Min(50)
+    // 피해야 할 반경 (미터 단위, 최소 50미터)
     private double avoidRadius;
 }
 

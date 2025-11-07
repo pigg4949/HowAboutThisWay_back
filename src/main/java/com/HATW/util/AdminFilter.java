@@ -44,7 +44,7 @@ public class AdminFilter implements Filter {
 
         try {
             String token = authHeader.substring(7);
-            UserDTO user = userService.getUserInfoFromToken(authHeader); // 또는 userService.getUserInfoFromToken(token);
+            UserDTO user = userService.getUserInfoFromToken(authHeader);
 
             if (user == null) {
                 res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않은 토큰입니다.");
